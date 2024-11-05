@@ -3,9 +3,12 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
 
 const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
 
+// U27EXBWE43DDT16C2ECPTMB6
 export default function Login() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
@@ -28,7 +31,7 @@ export default function Login() {
     if (emailVerify && passwordVerify) {
       const userData = { email, password };
       try {
-        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with local IP
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
           headers: { 'Content-Type': 'application/json' },
         });
         Alert.alert("Login Successful", res.data.message);
@@ -84,15 +87,14 @@ export default function Login() {
               autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {
-                password.length > 0  &&  <Feather
-                name={showPassword ? "eye" : "eye-off"}
-                color={passwordVerify ? "green" : "red"}
-                size={20}
-                style={styles.icon}
-              />
-              }
-            
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
             </TouchableOpacity>
           </View>
           {!passwordVerify && password.length > 0 && (
@@ -104,6 +106,17 @@ export default function Login() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Phone</Text>
             </TouchableOpacity>
           </View>
 
@@ -165,7 +178,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     marginTop: -15,
-
   },
   buttonContainer: {
     alignSelf: 'center',
@@ -200,5 +212,28 @@ const styles = StyleSheet.create({
     color: 'red',
     alignSelf: 'center',
     marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
