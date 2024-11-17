@@ -3,27 +3,35 @@ import { StyleSheet, View, Text } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { Avatar, Title } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"; 
+import MaterialIcons from "react-native-vector-icons/MaterialIcons"; 
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DrawerList = [
-  { icon: "home-outline", label: "Home", navigateTo: "Home", color: "" },
+  { icon: "home-outline", label: "Home", navigateTo: "Home" },
   { icon: "account-multiple", label: "Profile", navigateTo: "Profile" },
-//   { icon: "account-group", label: "User", navigateTo: "User" },
-//   { icon: "bookshelf", label: "Library", navigateTo: "Library" },
+  { icon: "greenhouse", label: "Property", navigateTo: "Property" },
+  { icon: "settings", label: "Setting", navigateTo: "Setting" },
+  { icon: "hoop-house", label: "AddProperty", navigateTo: "AddProperty" }
 ];
 
-const DrawerLayout = ({ icon, label, navigateTo, color }) => {
+const DrawerLayout = ({ icon, label, navigateTo }) => {
   const navigation = useNavigation();
   return (
-    //ye jo DraweItem he ye react-nativivagation/native se milta he 
     <DrawerItem
-      icon={({ color: iconColor, size }) => (
-        <Icon name={icon} color={color || iconColor} size={size} />
-      )}
+      icon={({ color: iconColor, size }) => {
+        if (icon === "settings") {
+          return <MaterialIcons name={icon} color={iconColor} size={size} />;
+        }
+        return <Icon name={icon} color={iconColor} size={size} />;
+      }}
       label={label}
       onPress={() => {
-        navigation.navigate(navigateTo);
+        console.log(navigation);
+        console.log(navigateTo);
+         navigation.navigate('Profile');
+        //navigation.navigate(navigateTo);
       }}
     />
   );
@@ -36,12 +44,23 @@ const DrawerItems = () => {
       icon={el.icon}
       label={el.label}
       navigateTo={el.navigateTo}
-      color={el.color} // Pass color to DrawerLayout
     />
   ));
 };
 
-function DrawerContent(props) {
+const DrawerContent = ({ setIsLogedIn, ...props }) => {
+  const navigation = useNavigation();
+
+  const signOut = async () => {
+    try {
+      await AsyncStorage.removeItem("isLogedIn");
+      setIsLogedIn(false);
+      navigation.navigate("Login");
+    } catch (error) {
+      console.error("Error during sign out", error);
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
@@ -51,16 +70,13 @@ function DrawerContent(props) {
               <View style={{ flexDirection: "row", marginTop: 15 }}>
                 <Avatar.Image
                   source={{
-                    uri: "https://images.unsplash.com/photo-1729396877734-801af2fa5709?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                    uri: "https://example.com/avatar.jpg",
                   }}
                   size={50}
-                  style={{ marginTop: 5 }}
                 />
-                <View style={{ marginLeft: 10, flexDirection: "column" }}>
-                  <Title style={styles.title}>Javed</Title>
-                  <Text style={styles.caption} numberOfLines={1}>
-                    javed@gmail.com
-                  </Text>
+                <View style={{ marginLeft: 10 }}>
+                  <Title style={styles.title}>User</Title>
+                  <Text style={styles.caption}>user@example.com</Text>
                 </View>
               </View>
             </View>
@@ -72,39 +88,37 @@ function DrawerContent(props) {
       </DrawerContentScrollView>
       <View style={styles.signOutContainer}>
         <DrawerItem
-          icon={({ color, size }) => (
-            <Icon name="exit-to-app" color={color} size={size} />
-          )}
+          onPress={signOut}
+          icon={({ color, size }) => <Icon name="exit-to-app" color={color} size={size} />}
           label="Sign Out"
         />
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   drawerContent: {
     flex: 1,
-    padding: 20,
   },
   userInfoSection: {
-    paddingVertical: 20,
+    paddingLeft: 20,
   },
   title: {
     fontSize: 16,
+    marginTop: 3,
     fontWeight: "bold",
   },
   caption: {
     fontSize: 14,
+    lineHeight: 14,
     color: "gray",
   },
   drawerSection: {
     marginTop: 15,
   },
   signOutContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    padding: 10,
+    marginBottom: 15,
   },
 });
 

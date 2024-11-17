@@ -1185,3 +1185,4482 @@ const styles = StyleSheet.create({
 });
 
 
+
+//**************************** OTP VERIFICATION TO PHONE NUMBER 
+1.NPM INSTALL otp-generator 
+2.npm install twilio
+
+
+
+//************** Login.js 
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google 
+  const loginWithGoogle=()=>{
+    window.open("http://localhost:5001/auth/google/callback","_self");
+  }
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+*************************************************************************************************************************
+*************************************************************************************************************************
+
+                        Complete and Login.js Full Working Code
+
+
+*************************************************************************************************************************
+*************************************************************************************************************************
+
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google 
+  const loginWithGoogle = () => {
+    window.open("http://localhost:5001/auth/google", "_self");
+};
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+
+/////////////// app.json
+{
+  "expo": {
+    "name": "login-register",
+    "slug": "login-register",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+
+
+******************************************************************************************************************************************************************
+******************************************************************************************************************************************************************
+            login with facebook
+            Login code code comlete 
+******************************************************************************************************************************************************************
+******************************************************************************************************************************************************************
+
+
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+// import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData,setUserData]=useState({});
+  console.log(userData.length)
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Register');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google 
+  // const loginWithGoogle = () => {
+  //   // Open Google login window and handle redirect to /auth/callback on completion
+  //   const newWindow = window.open("http://localhost:5001/auth/google", "_blank");
+  
+  //   // Check if window opened successfully
+  //   if (newWindow) {
+  //     // Listen for message or redirect completion
+  //     window.addEventListener('message', (event) => {
+  //       // Assuming your backend sends user data through a postMessage
+  //       if (event.origin === "http://localhost:5001") {
+  //         const userData = event.data; // Extract user data
+  //         console.log("User data received:", userData);
+  //       }
+  //     });
+  //   } else {
+  //     console.log("Failed to open Google login window.");
+  //   }
+  // };
+  
+  const loginWithGoogle = () => {
+    const data= window.open("http://localhost:5001/auth/google", "_self");
+    console.log(data);
+};
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton}>
+              <FontAwesome
+                name="facebook"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+
+
+
+****************** Update code after facebook
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData, setUserData] = useState({});
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Register');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  const loginWithGoogle = () => {
+    window.open("http://localhost:5001/auth/google", "_self");
+  };
+
+  const loginWithFacebook = () => {
+    window.open("http://localhost:5001/auth/facebook", "_self");
+  };
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+
+        {/* Email Input */}
+        <Text style={styles.label}>Email</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Enter your email"
+            style={styles.input}
+            value={email}
+            onChangeText={handleEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          {email.length > 0 && (
+            <Feather
+              name={emailVerify ? "check-circle" : "x-circle"}
+              color={emailVerify ? "green" : "red"}
+              size={20}
+              style={styles.icon}
+            />
+          )}
+        </View>
+        {!emailVerify && email.length > 0 && (
+          <Text style={styles.errorText}>Enter a valid email address.</Text>
+        )}
+
+        {/* Password Input */}
+        <Text style={styles.label}>Password</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Enter your password"
+            style={styles.input}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={handlePassword}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            {password.length > 0 && (
+              <Feather
+                name={showPassword ? "eye" : "eye-off"}
+                color={passwordVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+        {!passwordVerify && password.length > 0 && (
+          <Text style={styles.errorText}>
+            Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+          </Text>
+        )}
+
+        {/* Login Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Google Login */}
+        <View style={styles.phone}>
+          <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+            <FontAwesome
+              name="google"
+              size={24}
+              style={styles.phoneIcon}
+            />
+            <Text style={styles.phoneText}>Sign in with Google</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Facebook Login */}
+        <View style={styles.phone}>
+          <TouchableOpacity style={styles.phoneButton} onPress={loginWithFacebook}>
+            <FontAwesome
+              name="facebook"
+              size={24}
+              style={styles.phoneIcon}
+            />
+            <Text style={styles.phoneText}>Sign in with Facebook</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Register Link */}
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>
+            Don't have an account?{' '}
+            <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+              Register
+            </Text>
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+    marginLeft: 20,
+  },
+  phone: {
+    marginTop: 15,
+    width: '90%',
+    alignSelf: 'center',
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+
+******************************** update code before facebook
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+// import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData,setUserData]=useState({});
+  console.log(userData.length)
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Register');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google 
+  // const loginWithGoogle = () => {
+  //   // Open Google login window and handle redirect to /auth/callback on completion
+  //   const newWindow = window.open("http://localhost:5001/auth/google", "_blank");
+  
+  //   // Check if window opened successfully
+  //   if (newWindow) {
+  //     // Listen for message or redirect completion
+  //     window.addEventListener('message', (event) => {
+  //       // Assuming your backend sends user data through a postMessage
+  //       if (event.origin === "http://localhost:5001") {
+  //         const userData = event.data; // Extract user data
+  //         console.log("User data received:", userData);
+  //       }
+  //     });
+  //   } else {
+  //     console.log("Failed to open Google login window.");
+  //   }
+  // };
+  
+  const loginWithGoogle = () => {
+    const data= window.open("http://localhost:5001/auth/google", "_self");
+    console.log(data);
+};
+
+
+const loginWithFacebook = () => {
+  const data= window.open("http://localhost:5001/auth/facebook", "_self");
+  console.log(data);
+};
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+
+
+          
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithFacebook}>
+              <FontAwesome
+                name="facebook"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom:20
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+    marginLeft:20
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+
+
+//////////////////////   Login.js code  *********************** Facebook authentication jab wo facebook page per ja rha he 
+
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData, setUserData] = useState({});
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Register');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  const loginWithGoogle = () => {
+    window.open("http://localhost:5001/auth/google", "_self");
+  };
+
+  const loginWithFacebook = () => {
+    window.open("http://localhost:5001/auth/facebook", "_self");
+  };
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+
+        {/* Email Input */}
+        <Text style={styles.label}>Email</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Enter your email"
+            style={styles.input}
+            value={email}
+            onChangeText={handleEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          {email.length > 0 && (
+            <Feather
+              name={emailVerify ? "check-circle" : "x-circle"}
+              color={emailVerify ? "green" : "red"}
+              size={20}
+              style={styles.icon}
+            />
+          )}
+        </View>
+        {!emailVerify && email.length > 0 && (
+          <Text style={styles.errorText}>Enter a valid email address.</Text>
+        )}
+
+        {/* Password Input */}
+        <Text style={styles.label}>Password</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Enter your password"
+            style={styles.input}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={handlePassword}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            {password.length > 0 && (
+              <Feather
+                name={showPassword ? "eye" : "eye-off"}
+                color={passwordVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+        {!passwordVerify && password.length > 0 && (
+          <Text style={styles.errorText}>
+            Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+          </Text>
+        )}
+
+        {/* Login Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Google Login */}
+        <View style={styles.phone}>
+          <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+            <FontAwesome
+              name="google"
+              size={24}
+              style={styles.phoneIcon}
+            />
+            <Text style={styles.phoneText}>Sign in with Google</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Facebook Login */}
+        <View style={styles.phone}>
+          <TouchableOpacity style={styles.phoneButton} onPress={loginWithFacebook}>
+            <FontAwesome
+              name="facebook"
+              size={24}
+              style={styles.phoneIcon}
+            />
+            <Text style={styles.phoneText}>Sign in with Facebook</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Register Link */}
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>
+            Don't have an account?{' '}
+            <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+              Register
+            </Text>
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+    marginLeft: 20,
+  },
+  phone: {
+    marginTop: 15,
+    width: '90%',
+    alignSelf: 'center',
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+*************************************************************** AFTER IMPLEMENT TAB NAVIGATION OR DRAWER NAVIGATION*************
+******************//////////////////***********************//////////////////////////////****************************/**********
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+// import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData,setUserData]=useState({});
+  console.log(userData.length)
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Home');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      try {
+        const res = await axios.post('http://localhost:5001/user/login', userData, {  // Replace with your local IP
+          headers: { 'Content-Type': 'application/json' },
+        });
+        Alert.alert("Login Successful", res.data.message);
+        navigation.navigate('Register');
+      } catch (error) {
+        console.error("Login Error:", error.toJSON());
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google 
+  // const loginWithGoogle = () => {
+  //   // Open Google login window and handle redirect to /auth/callback on completion
+  //   const newWindow = window.open("http://localhost:5001/auth/google", "_blank");
+  
+  //   // Check if window opened successfully
+  //   if (newWindow) {
+  //     // Listen for message or redirect completion
+  //     window.addEventListener('message', (event) => {
+  //       // Assuming your backend sends user data through a postMessage
+  //       if (event.origin === "http://localhost:5001") {
+  //         const userData = event.data; // Extract user data
+  //         console.log("User data received:", userData);
+  //       }
+  //     });
+  //   } else {
+  //     console.log("Failed to open Google login window.");
+  //   }
+  // };
+  
+  const loginWithGoogle = () => {
+    const data= window.open("http://localhost:5001/auth/google", "_self");
+    console.log(data);
+};
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom:20
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+*************************************************************** be fore store user functionality ****************************
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Toast from "react-native-toast-message";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { DrawerActions } from '@react-navigation/native'; // for drawer toggle
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Import Screens
+import Login from './authPage/Login';
+import HomeScreen from "./screens/HomeScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import DrawerContent from "./DrawerContent"; // Your custom Drawer content
+import Register from "./authPage/Register";
+import PhonePage from "./authPage/PhonePage";
+import { useEffect, useState } from "react";
+
+const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
+
+// Stack Navigation (to manage deeper screens)
+const StackNav = () => {
+  const navigation = useNavigation();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        statusBarColor: 'blue',
+        headerStyle: {
+          backgroundColor: 'blue',
+        },
+        headerTintColor: 'white',
+        headerTitleAlign: 'center',
+      }}
+    >
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          headerLeft: () => (
+            <Ionicons
+              name='menu'
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              size={24}
+              color='white'
+              style={{ marginLeft: 10 }}
+            />
+          ),
+        }}
+      />
+      {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
+    </Stack.Navigator>
+  );
+};
+
+// Tab Navigation (for bottom tab navigation)
+const TabNav = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: 'white',
+        tabBarInactiveTintColor: 'white',
+        tabBarLabelStyle: {
+          marginBottom: 5, fontSize: 15
+        },
+        tabBarStyle: { backgroundColor: 'blue' }
+      }}
+    >
+      <Tab.Screen
+        name='Home'
+        component={StackNav}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              size={28}
+              color={'white'}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name='Profile'
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile', 
+          tabBarIcon: ({ focused, color, size }) => (
+            <FontAwesome
+              name={focused ? 'user' : 'user-o'}
+              size={28}
+              color={'white'}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+// Drawer Navigation (with TabNav inside)
+const DrawerNav = () => {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <DrawerContent {...props} />}
+      screenOptions={{
+        statusBarColor: 'orange',
+        headerStyle: {
+          backgroundColor: 'orange',
+        },
+        headerTintColor: 'white',
+        headerTitleAlign: 'center',
+        headerShown: false,  // Hide header in the Drawer itself
+      }}
+    >
+      {/* The Home screen in the drawer will show the TabNav */}
+      <Drawer.Screen name="Home" component={TabNav} />
+    </Drawer.Navigator>
+  );
+};
+
+
+
+// Main App Component
+export default function App() {
+  const [isLogedIn,setIsLogedIn]=useState(false);
+
+const getUserData = async()=>{
+  const data = await AsyncStorage.getItem("isLogedIn");
+  console.log(data);
+  setIsLogedIn(data);
+}
+
+useEffect(()=>{
+  getUserData();
+})
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Define the Login and Register screens inside a stack */}
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Register" component={Register} />
+
+        <Stack.Screen name="Phone" component={PhonePage} />
+
+        
+        {/* After login, navigate to DrawerNav */}
+        <Stack.Screen name="Home" component={DrawerNav} />
+      </Stack.Navigator>
+
+      {/* Adding Toast here to make it accessible across the entire app */}
+      <Toast />
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+
+*****************************************************************************************************************************
+                                  OLD LOGIN PAGE 
+*****************************************************************************************************************************
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Dimensions, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import Phone from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
+
+const { width: screenWidth } = Dimensions.get('window');
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData,setUserData]=useState({});
+  console.log(userData.length)
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", { withCredentials: true });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate('Home');
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText));
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(passwordText));
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+      
+      // Log the user data being sent in the request
+      console.log("Submitting data:", userData);
+    
+      try {
+        // Make the POST request to the backend
+        const res = await axios.post('http://localhost:5001/user/login', userData, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        // Log the response from the server
+        console.log("Response from server:", res.data);
+        
+        // If the login is successful, show an alert
+        Alert.alert("Login Successful", res.data.message);
+        
+        // Store the token in AsyncStorage
+        await AsyncStorage.setItem("token", res.data.user.token);
+       AsyncStorage.setItem("isLogedIn",JSON.stringify(true));
+  
+        // Navigate to the 'Home' screen
+        navigation.navigate('Home');
+      } catch (error) {
+        // Log any error that occurs during the request
+        console.error("Login Error:", error.toJSON());
+        
+        // Show an alert with the error message
+        Alert.alert("Login Error", error.response?.data?.message || "Unable to login. Please try again.");
+      }
+    } else {
+      // Log if email or password validation fails
+      console.log("Invalid input: ", { emailVerify, passwordVerify });
+    
+      // Show an alert for invalid input
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+  
+  
+
+  //login with google 
+  // const loginWithGoogle = () => {
+  //   // Open Google login window and handle redirect to /auth/callback on completion
+  //   const newWindow = window.open("http://localhost:5001/auth/google", "_blank");
+  
+  //   // Check if window opened successfully
+  //   if (newWindow) {
+  //     // Listen for message or redirect completion
+  //     window.addEventListener('message', (event) => {
+  //       // Assuming your backend sends user data through a postMessage
+  //       if (event.origin === "http://localhost:5001") {
+  //         const userData = event.data; // Extract user data
+  //         console.log("User data received:", userData);
+  //       }
+  //     });
+  //   } else {
+  //     console.log("Failed to open Google login window.");
+  //   }
+  // };
+  
+  const loginWithGoogle = () => {
+    const data= window.open("http://localhost:5001/auth/google", "_self");
+    console.log(data);
+};
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: 'white' }}>
+      <View>
+        <Image source={require('../assets/LoginPage.png')} style={styles.image} />
+        <View style={styles.loginHeading}>
+          <Text style={styles.loginText}>Login</Text>
+        </View>
+        <View>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase, number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={() => navigation.navigate('Phone')}>
+              <Phone
+                name="phone"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with phone</Text>
+            </TouchableOpacity>
+          </View>
+
+
+          <View style={styles.phone}>
+            <TouchableOpacity style={styles.phoneButton} onPress={loginWithGoogle}>
+              <FontAwesome
+                name="google"
+                size={24}
+                style={styles.phoneIcon}
+              />
+              <Text style={styles.phoneText}>Sign in with google</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
+                Register
+              </Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: screenWidth,
+    height: screenWidth,
+    resizeMode: 'contain',
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    marginVertical: 15,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 16,
+    width: '90%',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 45,
+    width: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom:10
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  registerLink: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    // alignSelf: 'center',
+    marginLeft:20,
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // alignItems: 'center',
+    width:'90%',
+    alignSelf:'center'
+  },
+  phoneButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  phoneIcon: {
+    color: 'white',
+    marginRight: 8,
+  },
+  phoneText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+
+
+************************************************************************************************************************
+                                            COMPLETE LOGIN PAGE CODE
+************************************************************************************************************************
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import {
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import Phone from "react-native-vector-icons/AntDesign";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+// import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
+
+const { width: screenWidth } = Dimensions.get("window");
+// U27EXBWE43DDT16C2ECPTMB6
+
+// U27EXBWE43DDT16C2ECPTMB6
+export default function Login() {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState("");
+  const [emailVerify, setEmailVerify] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userData, setUserData] = useState({});
+  console.log(userData.length);
+
+  const getGoogleUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/login/success", {
+        withCredentials: true,
+      });
+      console.log("Response", res);
+      setUserData(res.data.user);
+
+      if (res.data.user) {
+        // If user data is available, navigate to Register
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.log("Error fetching Google user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getGoogleUser();
+  }, []);
+
+  const handleEmail = (emailText) => {
+    setEmail(emailText);
+    setEmailVerify(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailText)
+    );
+  };
+
+  const handlePassword = (passwordText) => {
+    setPassword(passwordText);
+    setPasswordVerify(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(
+        passwordText
+      )
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (emailVerify && passwordVerify) {
+      const userData = { email, password };
+
+      // Log the user data being sent in the request
+      console.log("Submitting data:", userData);
+
+      try {
+        // Make the POST request to the backend
+        const res = await axios.post(
+          "http://localhost:5001/user/login",
+          userData,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        // Log the response from the server
+        console.log("Response from server:", res.data);
+
+        // If the login is successful, show an alert
+        Alert.alert("Login Successful", res.data.message);
+
+        // Store the token in AsyncStorage
+        await AsyncStorage.setItem("token", res.data.user.token);
+        AsyncStorage.setItem("isLogedIn", JSON.stringify(true));
+
+        // Navigate to the 'Home' screen
+        navigation.navigate("Home");
+      } catch (error) {
+        // Log any error that occurs during the request
+        console.error("Login Error:", error.toJSON());
+
+        // Show an alert with the error message
+        Alert.alert(
+          "Login Error",
+          error.response?.data?.message || "Unable to login. Please try again."
+        );
+      }
+    } else {
+      // Log if email or password validation fails
+      console.log("Invalid input: ", { emailVerify, passwordVerify });
+
+      // Show an alert for invalid input
+      Alert.alert("Invalid Input", "Please enter a valid email and password.");
+    }
+  };
+
+  //login with google
+  // const loginWithGoogle = () => {
+  //   // Open Google login window and handle redirect to /auth/callback on completion
+  //   const newWindow = window.open("http://localhost:5001/auth/google", "_blank");
+
+  //   // Check if window opened successfully
+  //   if (newWindow) {
+  //     // Listen for message or redirect completion
+  //     window.addEventListener('message', (event) => {
+  //       // Assuming your backend sends user data through a postMessage
+  //       if (event.origin === "http://localhost:5001") {
+  //         const userData = event.data; // Extract user data
+  //         console.log("User data received:", userData);
+  //       }
+  //     });
+  //   } else {
+  //     console.log("Failed to open Google login window.");
+  //   }
+  // };
+
+  const loginWithGoogle = () => {
+    const data = window.open("http://localhost:5001/auth/google", "_self");
+    console.log(data);
+  };
+
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "white" }}
+    >
+      <View>
+        {/* <Image source={require('../assets/LoginPage.png')} style={styles.image} /> */}
+        <View style={styles.TopPageDesign}></View>
+
+        {/* LOGO AND HEADING DESIGN */}
+        <View style={styles.loginHeading}>
+          <View>
+            <Image
+              source={require("../assets/logo-image.jpg")}
+              style={styles.image}
+            />
+          </View>
+          <View>
+            <Text style={styles.loginText}>Login</Text>
+          </View>
+        </View>
+
+        {/* Button Design */}
+        <View style={styles.actionButton}>
+          <View style={styles.signIn}>
+            <TouchableOpacity>
+              <Text style={styles.actionButtonText}>SignIn</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.signUp}>
+            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+              <Text style={styles.actionButtonText}>SignUp</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* form design */}
+        <View style={styles.formDesign}>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your email"
+              style={styles.input}
+              value={email}
+              onChangeText={handleEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {email.length > 0 && (
+              <Feather
+                name={emailVerify ? "check-circle" : "x-circle"}
+                color={emailVerify ? "green" : "red"}
+                size={20}
+                style={styles.icon}
+              />
+            )}
+          </View>
+          {!emailVerify && email.length > 0 && (
+            <Text style={styles.errorText}>Enter a valid email address.</Text>
+          )}
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={handlePassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {password.length > 0 && (
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? "green" : "red"}
+                  size={20}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          {!passwordVerify && password.length > 0 && (
+            <Text style={styles.errorText}>
+              Password must be 8-20 characters, with uppercase, lowercase,
+              number, and special character.
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* sign in with social icons  */}
+          <View style={styles.socialText}>
+            <Text>OR SIGNIN WITH US</Text>
+          </View>
+
+          <View style={styles.socialIcon}>
+            <View style={styles.phone}>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={() => navigation.navigate("Phone")}
+              >
+                {/* <Phone name="phone" size={24} style={styles.phoneIcon} />  */}
+                <Image source={require('../assets/phoneImage.jpg')} style={styles.phoneMedia}/>
+
+                {/* phoneImage.jpg */}
+                {/* <Text style={styles.phoneText}>Sign in with phone</Text> */}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.google}>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={loginWithGoogle}
+              >
+                {/* <FontAwesome name="google" size={24} style={styles.phoneIcon} /> */}
+                <Image source={require('../assets/google-media.jpg')} style={styles.googleMedia}/>
+
+                {/* <Text style={styles.phoneText}>Sign in with google</Text> */}
+              </TouchableOpacity>
+            </View>
+          </View>
+          {/* <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerLink} >
+                Register
+              </Text>
+            </Text>
+          </View> */}
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+    borderRadius: "50%",
+  },
+  loginHeading: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: -200,
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  label: {
+    fontSize: 16,
+    width: "90%",
+    alignSelf: "center",
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "90%",
+    alignSelf: "center",
+  },
+  input: {
+    height: 45,
+    width: "100%",
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
+  },
+  icon: {
+    position: "absolute",
+    right: 10,
+    marginTop: -15,
+  },
+  buttonContainer: {
+    alignSelf: "center",
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: "blue",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  registerContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  registerText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  registerLink: {
+    fontWeight: "bold",
+    color: "blue",
+  },
+  errorText: {
+    color: "red",
+    marginLeft: 20,
+    marginBottom: 5,
+  },
+  phone: {
+    marginTop: 15,
+    // width: "90%",
+    alignSelf: "center",
+  },
+  google: {
+    marginTop: 15,
+    // width: "90%",
+    alignSelf: "center",
+  },
+  socialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    // backgroundColor: "#4CAF50",
+    borderRadius: 8,
+    justifyContent: "center",
+  },
+  googleMedia: {
+  width:40,
+  height:40
+  },
+  phoneMedia: {
+    width:40,
+    height:40,
+    borderBottomWidth:1,
+    borderBottomColor:'black'
+    },
+  phoneText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  TopPageDesign: {
+    width: "100%",
+    height: 250,
+    backgroundColor: "blue",
+    borderBottomLeftRadius: "30%",
+    borderBottomRightRadius: "30%",
+  },
+  formDesign: {
+    marginTop: 50,
+  },
+  actionButton: {
+    flexDirection: "row",
+    gap: 20,
+    alignSelf: "center",
+    marginTop: 100,
+  },
+  signIn: {
+    backgroundColor: "blue",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    // Added shadow properties for raised effect
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5, // For Android
+  },
+  signUp: {
+    backgroundColor: "gray",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    // Added shadow properties for raised effect
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5, // For Android
+  },
+  actionButtonText: {
+    fontSize: 20,
+    color: "#fff",
+  },
+  socialText: {
+    alignSelf: "center",
+    marginTop: 15,
+    fontSize: 25,
+  },
+  socialIcon:{
+    flexDirection:'row',
+    gap:10,
+    alignSelf:'center',
+    marginTop:-10
+  }
+});
+
+
+***********************************************************************************************************
+                                            after image save APP.JS
+                                            ************************
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, View } from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Toast from "react-native-toast-message";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { DrawerActions } from "@react-navigation/native"; // for drawer toggle
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import AddPropertyScreen from './screens/AddPropertyScreen';
+
+// Import Screens
+import Login from "./authPage/Login";
+import HomeScreen from "./screens/HomeScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import DrawerContent from "./DrawerContent"; // Your custom Drawer content
+import Register from "./authPage/Register";
+import PhonePage from "./authPage/PhonePage";
+import { useEffect, useState } from "react";
+import SettingScreen from "./screens/SettingScreen";
+import PropertyScreen from "./screens/PropertyScreen";
+import EntryPage from "./authPage/EntryPage";
+
+const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
+
+// Stack Navigation (to manage deeper screens)
+const StackNav = () => {
+  const navigation = useNavigation();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        statusBarColor: "blue",
+        headerStyle: {
+          backgroundColor: "blue",
+        },
+        headerTintColor: "white",
+        headerTitleAlign: "center",
+      }}
+    >
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          headerLeft: () => (
+            <Ionicons
+              name="menu"
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              size={24}
+              color="white"
+              style={{ marginLeft: 10 }}
+            />
+          ),
+        }}
+      />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="Property" component={PropertyScreen} />
+      <Stack.Screen name="Setting" component={SettingScreen} />
+      <Stack.Screen name="AddProperty" component={AddPropertyScreen} />
+
+    </Stack.Navigator>
+  );
+};
+
+// Tab Navigation (for bottom tab navigation)
+const TabNav = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "blue", // Active tab color
+        tabBarInactiveTintColor: "gray", // Inactive tab icon color
+        tabBarLabelStyle: {
+          marginBottom: 5,
+          fontSize: 15, // Font size of the tab label
+        },
+        tabBarLabelStyle: {
+          fontSize: 12, // Decrease the font size of all tab labels
+          letterSpacing: 1, // Adjust spacing between letters for all labels
+          // Optional: Make all labels uppercase
+        },
+        tabBarStyle: { backgroundColor: "#fff", height: 60 }, // Tab bar background color
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={StackNav}
+        options={{
+          tabBarLabel: "Home",
+          tabBarLabel: "Home", // Add label
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={28}
+              color={color} // Color will be handled by tabBarActiveTintColor and tabBarInactiveTintColor
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: "Profile", // Add label
+          tabBarIcon: ({ focused, color, size }) => (
+            <FontAwesome
+              name={focused ? "user" : "user-o"}
+              size={28}
+              color={color} // Color will be handled by tabBarActiveTintColor and tabBarInactiveTintColor
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Property"
+        component={PropertyScreen}
+        options={{
+          tabBarLabel: "Property", // Add label
+          tabBarIcon: ({ focused, color, size }) => (
+            <MaterialCommunityIcons
+              name={focused ? "hoop-house" : "greenhouse"}
+              size={28}
+              color={color} // Color will be handled by tabBarActiveTintColor and tabBarInactiveTintColor
+            />
+          ),
+       
+        }}
+      />
+
+      <Tab.Screen
+        name="Setting"
+        component={SettingScreen}
+        options={{
+          tabBarLabel: "Setting", // Add label
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? "settings-outline" : "settings-sharp"}
+              size={28}
+              color={color} // Color will be handled by tabBarActiveTintColor and tabBarInactiveTintColor
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+// Drawer Navigation (with TabNav inside)
+const DrawerNav = ({ setIsLogedIn }) => {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => (
+        <DrawerContent {...props} setIsLogedIn={setIsLogedIn} />
+      )}
+      screenOptions={{
+        statusBarColor: "orange",
+        headerStyle: {
+          backgroundColor: "orange",
+        },
+        headerTintColor: "white",
+        headerTitleAlign: "center",
+        headerShown: false, // Hide header in the Drawer itself
+      }}
+    >
+      {/* The Home screen in the drawer will show the TabNav */}
+      <Drawer.Screen name="Home" component={TabNav} />
+    </Drawer.Navigator>
+  );
+};
+
+const LoginNav = () => {
+  const Stack = createNativeStackNavigator();
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Define the Login and Register screens inside a stack */}
+      {/* <Stack.Screen name='EntryPage' component={EntryPage}/>
+      <Stack.Screen name="Login" component={Login} /> */}
+      {/* <Stack.Screen name="Register" component={Register} /> */}
+      {/* <Stack.Screen name="Phone" component={PhonePage} /> */}
+      {/* After login, navigate to DrawerNav */}
+      <Stack.Screen name="Home" component={DrawerNav} />
+    </Stack.Navigator>
+  );
+};
+
+// Main App Component
+export default function App() {
+  const [isLogedIn, setIsLogedIn] = useState(false);
+
+  const getUserData = async () => {
+    const data = await AsyncStorage.getItem("isLogedIn");
+    setIsLogedIn(data === "true");
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
+  return (
+    <NavigationContainer>
+      {isLogedIn ? <DrawerNav setIsLogedIn={setIsLogedIn} /> : <LoginNav />}
+      {/* Adding Toast here to make it accessible across the entire app */}
+      <Toast />
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+**********************************************************************************************************************
+                                          AddProperty Code With File Save In Database
+                                          *******************************************
+                                          *******************************************
+
+
+import React, { useState, useEffect } from 'react';
+import { Text, TouchableOpacity, View, Image, FlatList, StyleSheet } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+const AddPropertyScreen = () => {
+  const [imageUri, setImageUri] = useState(null);  // Store URI for image preview
+  const [base64Image, setBase64Image] = useState(null);  // Store base64 image data
+  const [images, setImages] = useState([]);  // Store all fetched images from the database
+
+  // Fetch all images from the database when the component mounts
+  useEffect(() => {
+    const fetchAllImages = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/property/images");
+        setImages(response.data.images);  // Set the list of images
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchAllImages();  // Call the function to fetch images
+  }, []);  // Empty array means this effect runs only once when the component mounts
+
+  // Function to open the image picker and select an image
+  const handleSelectImage = () => {
+    launchImageLibrary(
+      { mediaType: 'photo', includeBase64: true },  // Ensure base64 is included
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          setImageUri(response.assets[0].uri);  // Set the URI for preview
+          setBase64Image(response.assets[0].base64);  // Set the base64 image data
+        }
+      }
+    );
+  };
+
+  // Function to send the base64 image to the server
+  const createProperty = async (newImage) => {
+    try {
+      const response = await axios.post("http://localhost:5001/property/upload", newImage);
+      console.log('Upload response:', response.data);
+
+      // After upload, fetch all images again
+      const fetchResponse = await axios.get("http://localhost:5001/property/images");
+      setImages(fetchResponse.data.images);  // Update the images state with the newly uploaded image
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
+
+  // Handle form submission (upload the image)
+  const handleSubmit = async () => {
+    if (base64Image) {
+      console.log('Base64 Image:', base64Image);
+      await createProperty({ image: base64Image });  // Send the base64 image
+      alert("Image uploaded successfully!");
+    } else {
+      console.log('No image selected');
+      alert("Please select an image first.");
+    }
+  };
+
+  // Render each image in the FlatList
+  const renderImageItem = ({ item }) => (
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={styles.image} />
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={handleSelectImage} style={styles.button}>
+        <Text style={styles.buttonText}>Select Image</Text>
+      </TouchableOpacity>
+
+      {imageUri && (
+        <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+      )}
+
+      <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.title}>Uploaded Images:</Text>
+
+      {/* Render all uploaded images in a FlatList */}
+      <FlatList
+        data={images}  // List of all images from the database
+        renderItem={renderImageItem}  // Render each image
+        keyExtractor={(item, index) => index.toString()}  // Use index as key
+        numColumns={3}  // Display images in a grid (3 per row)
+        style={styles.imageList}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  button: {
+    padding: 15,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  imagePreview: {
+    marginTop: 20,
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+  },
+  title: {
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  imageList: {
+    marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  imageContainer: {
+    margin: 5,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+});
+
+export default AddPropertyScreen;
+
+*****************************************************************************************************
+                        second part of code save add property data 
+                        *****************************************
+                        *****************************************
+
+import { Text, TouchableOpacity, View, Image, FlatList, StyleSheet, TextInput, ScrollView } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+import React, { useState } from 'react';
+// import { Text, TouchableOpacity, View, Image, TextInput, ScrollView } from 'react-native';
+// import { launchImageLibrary } from 'react-native-image-picker';
+// import axios from 'axios';
+
+const AddPropertyScreen = () => {
+  // const [imageUri, setImageUri] = useState(null);  // Store URI for image preview
+  // const [base64Image, setBase64Image] = useState(null);  // Store base64 image data
+  const [images, setImages] = useState([]);  // Store all fetched images from the database
+  // const [features, setFeatures] = useState([]);  // Store the selected features
+  // const [arrention, setArrention] = useState('');  // Store the arrention value
+
+
+
+  const [imageUri, setImageUri] = useState(null);  // Store URI for image preview
+  const [base64Image, setBase64Image] = useState(null);  // Store base64 image data
+  const [propertyName, setPropertyName] = useState('');  // Store property name
+  const [rent, setRent] = useState('');  // Store rent
+  const [bedRoom, setBedRoom] = useState('');  // Store bedroom count
+  const [washRoom, setWashRoom] = useState('');  // Store washroom count
+  const [arrention, setArrention] = useState('');  // Store the arrention (features)
+  const [features, setFeatures] = useState([]);  // Store selected features
+
+  // // Fetch all images from the database when the component mounts
+  // useEffect(() => {
+  //   const fetchAllImages = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:5001/property/images");
+  //       setImages(response.data.images);  // Set the list of images
+  //     } catch (error) {
+  //       console.error('Error fetching images:', error);
+  //     }
+  //   };
+
+  //   fetchAllImages();  // Call the function to fetch images
+  // }, []);  // Empty array means this effect runs only once when the component mounts
+
+   // Function to open the image picker and select an image
+   const handleSelectImage = () => {
+    launchImageLibrary({ mediaType: 'photo', includeBase64: true }, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else {
+        setImageUri(response.assets[0].uri);  // Set the URI for preview
+        setBase64Image(response.assets[0].base64);  // Set the base64 image data
+      }
+    });
+  };
+
+  // Function to send the base64 image to the server
+  const createProperty = async (newImage) => {
+    try {
+      const response = await axios.post("http://localhost:5001/property/upload", newImage);
+      console.log('Upload response:', response.data);
+
+      // After upload, fetch all images again
+      // const fetchResponse = await axios.get("http://localhost:5001/property/images");
+      // setImages(fetchResponse.data.images);  // Update the images state with the newly uploaded image
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
+
+// Handle form submission (upload the property data)
+const handleSubmit = async () => {
+  if (base64Image && propertyName && rent && bedRoom && washRoom && arrention) {
+    try {
+      const newProperty = {
+        propertyName,
+        rent,
+        bedRoom,
+        washRoom,
+        arrention,
+        image: base64Image,  // Send the base64 image data along with other form fields
+      };
+
+      await createProperty(newProperty);
+      alert("Property uploaded successfully!");
+    } catch (error) {
+      console.error('Error uploading property:', error);
+      alert("Error uploading property. Please try again.");
+    }
+  } else {
+    alert("Please fill all the fields before submitting.");
+  }
+};
+
+
+   // Function to handle the feature selection
+   const handleFeatureChange = (value) => {
+    let updatedFeatures;
+    if (features.includes(value)) {
+      updatedFeatures = features.filter((item) => item !== value);  // Remove feature if already selected
+    } else {
+      updatedFeatures = [...features, value];  // Add feature if not already selected
+    }
+    setFeatures(updatedFeatures);
+    setArrention(updatedFeatures.join(', '));  // Update the arrention field with selected features
+  };
+
+  return (
+    <ScrollView style={{ backgroundColor: '#fff' }} showsHorizontalScrollIndicator={false}>
+      <View style={{ padding: 20 }}>
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Property Name</Text>
+        <TextInput
+          value={propertyName}
+          onChangeText={setPropertyName}
+          placeholder="Enter Property Name"
+          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+        />
+
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Rent</Text>
+        <TextInput
+          value={rent}
+          onChangeText={setRent}
+          placeholder="Enter Rent"
+          keyboardType="numeric"
+          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+        />
+
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Bed-Room</Text>
+        <TextInput
+          value={bedRoom}
+          onChangeText={setBedRoom}
+          placeholder="Enter Number of Bedrooms"
+          keyboardType="numeric"
+          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+        />
+
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Wash-Room</Text>
+        <TextInput
+          value={washRoom}
+          onChangeText={setWashRoom}
+          placeholder="Enter Number of Washrooms"
+          keyboardType="numeric"
+          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+        />
+
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Arrenition (Features)</Text>
+        <TextInput
+          value={arrention}
+          editable={false}
+          style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+        />
+
+        <Text style={{ fontSize: 18, marginBottom: 5 }}>Select Features</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {['wifi', 'borewell', 'powersp'].map((feature) => (
+            <TouchableOpacity
+              key={feature}
+              onPress={() => handleFeatureChange(feature)}
+              style={{
+                padding: 10,
+                margin: 5,
+                backgroundColor: features.includes(feature) ? '#4CAF50' : '#ddd',
+                borderRadius: 5,
+              }}
+            >
+              <Text>{feature}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity onPress={handleSelectImage} style={{ marginTop: 20, padding: 10, backgroundColor: '#2196F3', borderRadius: 5 }}>
+          <Text style={{ color: 'white' }}>Select Image</Text>
+        </TouchableOpacity>
+
+        {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200, marginTop: 20 }} />}
+
+        <TouchableOpacity onPress={handleSubmit} style={{ marginTop: 20, padding: 10, backgroundColor: '#4CAF50', borderRadius: 5 }}>
+          <Text style={{ color: 'white', fontSize: 20 }}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  button: {
+    padding: 15,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  submitButton: {
+    width: '90%',
+    padding: 10,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    marginTop: 20,
+  
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: 16,
+  },
+  imagePreview: {
+    marginTop: 10,
+    width: 320,
+    height: 250,
+    borderRadius: 10,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  input: {
+    borderRadius: 5,
+    width: '90%',
+    marginBottom: 10,
+    borderWidth: 1,
+    paddingVertical: 7,
+    paddingHorizontal: 5,
+    borderColor: 'gray',
+  },
+  form: {
+    width: '90%',
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    marginTop: 20,
+    // Removed border as per your request
+  },
+  featuresContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  featureButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    margin: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  selectedFeatureButton: {
+    backgroundColor: '#007BFF',
+  },
+  featureButtonText: {
+    color: '#333',
+    fontSize: 14,
+  },
+});
+
+export default AddPropertyScreen;
+
+///////////////////////// htane wal code 
+
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Button, Image, Text, FlatList } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+const FormComponent = () => {
+  const [textData, setTextData] = useState('');
+  const [textData2, setTextData2] = useState('');
+  const [allImage,setAllImage]=useState([]);
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [image, setImage] = useState(null);
+  console.log(image)
+
+
+  
+  // Fetch all images from the database when the component mounts
+  useEffect(() => {
+    const fetchAllImages = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/property/images");
+        setAllImage(response.data.images);  // Set the list of images
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchAllImages();  // Call the function to fetch images
+  }, []);  // Empty array means this effect runs only once when the component mounts
+
+
+  // Handle image selection
+  const selectImage = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    if (!result.didCancel) {
+      const { uri } = result.assets[0];
+      const base64 = await uriToBase64(uri); // Convert image to base64
+      setImage(base64);
+    }
+  };
+
+  // Convert image URI to base64 string
+  const uriToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submit
+  const submitForm = async () => {
+    const formData = {
+      textData,
+      textData2,
+      selectedItems,
+      imageBase64: image,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5001/property/upload', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      alert(response.data.message);
+       // After upload, fetch all images again
+       const fetchResponse = await axios.get("http://localhost:5001/property/images");
+       setImages(fetchResponse.data.images);  // Update the images state with the newly uploaded image
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
+  };
+
+   // Render each image in the FlatList
+   const renderImageItem = ({ item }) => (
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: `data:image/jpeg;base64,${item.image}` }} style={styles.image} />
+    </View>
+  );
+
+
+  return (
+    <View>
+      <TextInput
+        value={textData}
+        onChangeText={setTextData}
+        placeholder="Enter text data"
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+      />
+
+<TextInput
+        value={textData2}
+        onChangeText={setTextData2}
+        placeholder="Enter text data"
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+      />
+      <Button title="Select Items" onPress={() => setSelectedItems(['Item 1', 'Item 2'])} />
+      <FlatList
+        data={selectedItems}
+        renderItem={({ item }) => <Text>{item}</Text>}
+        keyExtractor={(item, index) => index.toString()}
+      />
+      <Button title="Select Image" onPress={selectImage} />
+      {image && <Image source={{ uri: `data:image/png;base64,${image}` }} style={{ width: 100, height: 100 }} />}
+      <Button title="Submit" onPress={submitForm} />
+
+
+      <Text style={styles.title}>Uploaded Images:</Text>
+
+{/* Render all uploaded images in a FlatList */}
+<FlatList
+  data={allImage}  // List of all images from the database
+  renderItem={renderImageItem}  // Render each image
+  keyExtractor={(item, index) => index.toString()}  // Use index as key
+  numColumns={3}  // Display images in a grid (3 per row)
+  style={styles.imageList}
+/>
+    </View>
+  );
+};
+
+export default FormComponent;
+
+
+
+
+**************************************************************************************************
+                          COMPLETE CODE TO SAVE DATA AND IMAGE 
+                          *************************************
+                          *************************************
+import React, { useState } from 'react';
+import { View, TextInput, Button, Image, Text, FlatList } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+const FormComponent = () => {
+  const [textData, setTextData] = useState('');
+  const [textData2, setTextData2] = useState('');
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [image, setImage] = useState(null);
+  console.log(image)
+
+  // Handle image selection
+  const selectImage = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    if (!result.didCancel) {
+      const { uri } = result.assets[0];
+      const base64 = await uriToBase64(uri); // Convert image to base64
+      setImage(base64);
+    }
+  };
+
+  // Convert image URI to base64 string
+  const uriToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submit
+  const submitForm = async () => {
+    const formData = {
+      textData,
+      textData2,
+      selectedItems,
+      imageBase64: image,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5001/property/upload', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
+  };
+
+  return (
+    <View>
+      <TextInput
+        value={textData}
+        onChangeText={setTextData}
+        placeholder="Enter text data"
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+      />
+
+<TextInput
+        value={textData2}
+        onChangeText={setTextData2}
+        placeholder="Enter text data"
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+      />
+      <Button title="Select Items" onPress={() => setSelectedItems(['Item 1', 'Item 2'])} />
+      <FlatList
+        data={selectedItems}
+        renderItem={({ item }) => <Text>{item}</Text>}
+        keyExtractor={(item, index) => index.toString()}
+      />
+      <Button title="Select Image" onPress={selectImage} />
+      {image && <Image source={{ uri: `data:image/png;base64,${image}` }} style={{ width: 100, height: 100 }} />}
+      <Button title="Submit" onPress={submitForm} />
+    </View>
+  );
+};
+
+export default FormComponent;
+
+*************************************************************************************************************************************
+                                        COMPLETE CODE TO SAVE Data and Fetch Image 
+                                        ******************************************
+                                    *************************************************
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Button, Image, Text, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+const FormComponent = () => {
+  const [textData, setTextData] = useState('');
+  const [textData2, setTextData2] = useState('');
+  const [allImage, setAllImage] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    const fetchAllImages = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/property/images");
+        setAllImage(response.data.images);  // Set the list of images
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchAllImages();  // Call the function to fetch images
+  }, []);  // Empty array means this effect runs only once when the component mounts
+
+  // Handle image selection
+  const selectImage = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      const { uri } = result.assets[0];
+      const base64 = await uriToBase64(uri); // Convert image to base64
+      setImage(base64);
+    }
+  };
+
+  // Convert image URI to base64 string
+  const uriToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submit
+  const submitForm = async () => {
+    const formData = {
+      textData,
+      textData2,
+      selectedItems,
+      imageBase64: image,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5001/property/upload', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      alert(response.data.message);
+
+      // After upload, fetch all images again
+      const fetchResponse = await axios.get("http://localhost:5001/property/images");
+      setAllImage(fetchResponse.data.images);  // Update the images state with the newly uploaded image
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
+  };
+
+  // Render each image and its associated data in the FlatList
+  const renderImageItem = ({ item }) => (
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }} style={styles.image} />
+      <Text style={styles.text}>{item.textData}</Text>
+      <Text style={styles.text}>{item.textData2}</Text>
+    </View>
+  );
+
+  return (
+    <ScrollView>
+    <View style={styles.container}>
+      <TextInput
+        value={textData}
+        onChangeText={setTextData}
+        placeholder="Enter text data"
+        style={styles.input}
+      />
+      <TextInput
+        value={textData2}
+        onChangeText={setTextData2}
+        placeholder="Enter second text data"
+        style={styles.input}
+      />
+      <Button title="Select Items" onPress={() => setSelectedItems(['Item 1', 'Item 2'])} />
+      <FlatList
+        data={selectedItems}
+        renderItem={({ item }) => <Text>{item}</Text>}
+        keyExtractor={(item, index) => index.toString()}
+      />
+      <Button title="Select Image" onPress={selectImage} />
+      {image && <Image source={{ uri: `data:image/png;base64,${image}` }} style={styles.selectedImage} />}
+      <Button title="Submit" onPress={submitForm} />
+
+      <Text style={styles.title}>Uploaded Images and Data:</Text>
+      {/* Render all uploaded images with their associated data in a FlatList */}
+      <FlatList
+        data={allImage}
+        renderItem={renderImageItem}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={3}  // Display images in a grid (3 per row)
+        style={styles.imageList}
+      />
+    </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    marginVertical: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  imageList: {
+    marginTop: 20,
+  },
+  imageContainer: {
+    margin: 5,
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+  },
+  text: {
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 5,
+  },
+});
+
+export default FormComponent;
+
+********************************************************************************************************
+                                            COMPLETE CODE TO SAVE DATA AND FETCH DATA
+                                        ***********************************************
+                                        ***********************************************
+// addProperty.js (React Native Component)
+
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Button, Image, Text, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+
+const FormComponent = () => {
+  const [textData, setTextData] = useState('');
+  const [textData2, setTextData2] = useState('');
+  const [allImage, setAllImage] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    const fetchAllImages = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/property/images");
+        setAllImage(response.data.data);  // Set the list of images and data
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchAllImages();  // Call the function to fetch images
+  }, []);  // Empty array means this effect runs only once when the component mounts
+
+  // Handle image selection
+  const selectImage = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      const { uri } = result.assets[0];
+      const base64 = await uriToBase64(uri); // Convert image to base64
+      setImage(base64);
+    }
+  };
+
+  // Convert image URI to base64 string
+  const uriToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submit
+  const submitForm = async () => {
+    const formData = {
+      textData,
+      textData2,
+      selectedItems,
+      imageBase64: image,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5001/property/upload', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      alert(response.data.message);
+
+      // After upload, fetch all images again
+      const fetchResponse = await axios.get("http://localhost:5001/property/images");
+      setAllImage(fetchResponse.data.data);  // Update the images state with the newly uploaded image
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting form');
+    }
+  };
+
+  // Render each image and its associated data in the FlatList
+  const renderImageItem = ({ item }) => (
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }} style={styles.image} />
+      <Text style={styles.text}>{item.textData}</Text>
+      <Text style={styles.text}>{item.textData2}</Text>
+      <Text style={{flexDirection:'column'}}>{item.selectedItems}</Text>
+    </View>
+  );
+
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        <TextInput
+          value={textData}
+          onChangeText={setTextData}
+          placeholder="Enter text data"
+          style={styles.input}
+        />
+        <TextInput
+          value={textData2}
+          onChangeText={setTextData2}
+          placeholder="Enter second text data"
+          style={styles.input}
+        />
+        <Button title="Select Items" onPress={() => setSelectedItems(['Item 1', 'Item 2'])} />
+        <FlatList
+          data={selectedItems}
+          renderItem={({ item }) => <Text>{item}</Text>}
+          keyExtractor={(item, index) => index.toString()}
+        />
+        <Button title="Select Image" onPress={selectImage} />
+        {image && <Image source={{ uri: `data:image/png;base64,${image}` }} style={styles.selectedImage} />}
+        <Button title="Submit" onPress={submitForm} />
+
+        <Text style={styles.title}>Uploaded Images and Data:</Text>
+        <FlatList
+          data={allImage}
+          renderItem={renderImageItem}
+          keyExtractor={(item, index) => index.toString()}
+          numColumns={3}  // Display images in a grid (3 per row)
+          style={styles.imageList}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    marginVertical: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  imageList: {
+    marginTop: 20,
+  },
+  imageContainer: {
+    margin: 5,
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+  },
+  text: {
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 5,
+  },
+});
+
+export default FormComponent;
+
+******************************************************************************************************************************************
+                                            Complete or Uncomlete code or save property 
+                                            ******************************************
+                                            ******************************************
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  Button,
+  Image,
+  Text,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
+import axios from "axios";
+import MultiSelect from 'react-native-multiple-select';
+
+const FormComponent = () => {
+  const [textData, setTextData] = useState("");
+  const [textData2, setTextData2] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  // const [selectedItems, setSelectedItems] = useState([]);
+  const [image, setImage] = useState(null);
+  
+  console.log(image);
+
+  const items = [
+    { id: '1', name: 'Apple' },
+    { id: '2', name: 'Banana' },
+    { id: '3', name: 'Cherry' },
+    { id: '4', name: 'Date' },
+    { id: '5', name: 'Elderberry' }
+  ];
+
+  const onSelectedItemsChange = (selectedItems) => {
+    setSelectedItems(selectedItems);
+  };
+
+
+  // Handle image selection
+  const selectImage = async () => {
+    const result = await launchImageLibrary({ mediaType: "photo" });
+    if (!result.didCancel) {
+      const { uri } = result.assets[0];
+      const base64 = await uriToBase64(uri); // Convert image to base64
+      setImage(base64);
+    }
+  };
+
+  // Convert image URI to base64 string
+  const uriToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle form submit
+  const submitForm = async () => {
+    const formData = {
+      textData,
+      textData2,
+      selectedItems,
+      imageBase64: image,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5001/property/upload",
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      alert(response.data.message);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Error submitting form");
+    }
+  };
+
+  return (
+    <ScrollView style={{ backgroundColor: "#fff" }}>
+      <View>
+
+
+
+        <View style={styles.form}>
+
+
+          <Text style={styles.label}>Propety Name</Text>
+          <TextInput placeholder="Enter property name.." style={styles.input} />
+
+          <Text style={styles.label}>Rent</Text>
+          <TextInput placeholder="Enter property rent.." style={styles.input} />
+
+
+          <Text style={styles.label}>Wash-Room</Text>
+          <TextInput placeholder="Enter wash-room quantity.." style={styles.input} />
+
+
+          <Text style={styles.label}>Bed-Room</Text>
+          <TextInput placeholder="Enter bed-room quantity.." style={styles.input} />
+
+          <MultiSelect
+        items={items}
+        uniqueKey="id"
+        onSelectedItemsChange={onSelectedItemsChange}
+        selectedItems={selectedItems}
+        selectText="Pick Items"
+        searchInputPlaceholderText="Search items..."
+        tagRemoveIconColor="#CCC"
+        tagBorderColor="#CCC"
+        tagTextColor="#000"
+        selectedItemTextColor="#000"
+        selectedItemIconColor="#000"
+        itemTextColor="#000"
+        displayKey="name"
+        searchInputStyle={styles.searchInput}
+        submitButtonColor="#48BB78"
+        submitButtonText="Submit"
+      />
+      <Text style={styles.selectedItemsText}>
+        Selected Items: {selectedItems.join(', ')}
+      </Text>
+
+
+        </View>
+
+
+
+
+
+
+        <View>
+          <TextInput
+            value={textData}
+            onChangeText={setTextData}
+            placeholder="Enter text data"
+            style={{
+              height: 40,
+              borderColor: "gray",
+              borderWidth: 1,
+              marginBottom: 10,
+            }}
+          />
+
+          <TextInput
+            value={textData2}
+            onChangeText={setTextData2}
+            placeholder="Enter text data"
+            style={{
+              height: 40,
+              borderColor: "gray",
+              borderWidth: 1,
+              marginBottom: 10,
+            }}
+          />
+          <Button
+            title="Select Items"
+            onPress={() => setSelectedItems(["Item 1", "Item 2"])}
+          />
+          <FlatList
+            data={selectedItems}
+            renderItem={({ item }) => <Text>{item}</Text>}
+            keyExtractor={(item, index) => index.toString()}
+          />
+          <Button title="Select Image" onPress={selectImage} />
+          {image && (
+            <Image
+              source={{ uri: `data:image/png;base64,${image}` }}
+              style={{ width: 100, height: 100 }}
+            />
+          )}
+          <Button title="Submit" onPress={submitForm} />
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default FormComponent;
+
+const styles = StyleSheet.create({
+  form: {
+    borderWidth: 2,
+    borderColor: "red",
+    width: "90%",
+    alignSelf: "center",
+    marginTop: 80,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 9,
+    marginLeft: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 7,
+    marginBottom:10
+  },
+});

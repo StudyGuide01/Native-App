@@ -66,18 +66,70 @@ navigation.navigate('Login')
     );
   };
 
+
+  // const logOut = async () => {
+  //   try {
+  //     // Open the logout URL
+  //     window.open("http://localhost:5001/googleLogout", "_self");
+  
+  //     // Clear user data after logout
+  //     setUserData(null);  // Assuming userData is stored in state and setUserData is the setter
+  
+  //     // Navigate to Login page if user data is cleared
+  //     navigation.navigate('Login');
+  //   } catch (error) {
+  //     console.log("Logout Error:", error);
+  //   }
+  // };
+  
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={{ backgroundColor: "white" }}>
-        <Image
+    <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: "white" }}>
+      <View >
+
+
+        {/* <Image
           source={require("../assets/LoginPage.png")}
           style={styles.image}
-        />
-        <View style={styles.loginHeading}>
+        /> */}
+
+
+        {/* <View style={styles.loginHeading}>
           <Text style={styles.loginText}>Register</Text>
+        </View> */}
+
+<View style={styles.TopPageDesign}>
+</View>
+
+ {/* LOGO AND HEADING DESIGN */}
+ <View style={styles.loginHeading}>
+          <View>
+          <Image source={require('../assets/logo-image.jpg')} style={styles.image} />
+
+          </View>
+        <View >
+          <Text style={styles.loginText}>Login</Text>
+        </View>
         </View>
 
-        <View>
+
+         {/* Button Design */}
+         <View style={styles.actionButton}>
+          <View style={styles.signIn}>
+            <TouchableOpacity  onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.actionButtonText}>SignIn</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.signUp}>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.actionButtonText}>SignUp</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+
+
+        <View style={styles.formDesign}>
           {/* Name Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Name</Text>
@@ -188,8 +240,18 @@ navigation.navigate('Login')
           </View>
         </View>
 
+
+        {/* Logout Button */}
+
+        {/* <View style={{backgroundColor:'green',marginTop:15,borderRadius:7,width:'90%',alignSelf:'center'}}>
+            <TouchableOpacity  onPress={logOut}>
+              <Text style={{alignSelf:'center',fontSize:25,paddingVertical:10,color:'white'}}>Logout</Text>
+            </TouchableOpacity>
+          </View> */}
+     
+
         {/* Login Link */}
-        <View style={styles.registerContainer}>
+        {/* <View style={styles.registerContainer}>
           <Text style={styles.registerText}>
             Already have an account?{" "}
             <Text
@@ -199,7 +261,7 @@ navigation.navigate('Login')
               Login
             </Text>
           </Text>
-        </View>
+        </View> */}
       </View>
     </ScrollView>
   );
@@ -207,9 +269,10 @@ navigation.navigate('Login')
 
 const styles = StyleSheet.create({
   image: {
-    width: screenWidth,
-    height: screenWidth,
-    resizeMode: "contain",
+    width: 80,                
+    height: 80,               
+    resizeMode: 'contain', 
+    borderRadius:'50%',    
   },
   loginHeading: {
     alignSelf: "center",
@@ -265,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: "blue",
     paddingVertical: 12,
     paddingHorizontal: 40,
-    borderRadius: 50, // Makes the button rounded
+    borderRadius: 8, // Makes the button rounded
     alignItems: "center",
   },
   buttonText: {
@@ -287,4 +350,66 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "blue",
   },
+  TopPageDesign:{
+    width:"100%",
+    height:250,
+    backgroundColor:'blue',
+    borderBottomLeftRadius:'30%',
+    borderBottomRightRadius:'30%'
+  },
+  formDesign:{
+marginTop:50
+  },
+  loginHeading: {
+    alignSelf: 'center',
+    flexDirection:'row',
+    alignItems:'center',
+    gap:10,
+    marginTop:-200
+  },
+  loginText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color:'#fff'
+  },
+  actionButton:{
+    flexDirection:'row',
+    gap:20,
+    alignSelf:'center',
+    marginTop:100
+  },
+  signIn:{
+    backgroundColor:'gray',
+    paddingVertical:10,
+    paddingHorizontal:15,
+    borderRadius:10,
+    // Added shadow properties for raised effect
+    shadowColor: "#000", 
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,  // For Android
+  },
+  signUp:{
+    backgroundColor:'blue',
+    paddingVertical:10,
+    paddingHorizontal:15,
+    borderRadius:10,
+    // Added shadow properties for raised effect
+    shadowColor: "#000", 
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,  // For Android
+  },
+  actionButtonText:{
+    fontSize:20,
+    color:'#fff'
+  }
 });
