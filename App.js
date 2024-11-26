@@ -23,7 +23,10 @@ import SettingScreen from "./screens/SettingScreen";
 import PropertyScreen from "./screens/PropertyScreen";
 import EntryPage from "./authPage/EntryPage";
 import AddPropertyScreen from './screens/AddPropertyScreen';
+import AddTenantScreen from "./screens/AddTanentScreen";
+import ShowTenantScreen from "./screens/ShowTenantScreen";
 
+// Create Navigation Containers
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,8 +64,9 @@ const StackNav = () => {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Property" component={PropertyScreen} />
       <Stack.Screen name="Setting" component={SettingScreen} />
-      <Stack.Screen name="AddProperty" component={AddPropertyScreen}/>
-
+      <Stack.Screen name="AddProperty" component={AddPropertyScreen} />
+      <Stack.Screen name='AddTenant' component={AddTenantScreen} />
+      <Stack.Screen name='ShowTenant' component={ShowTenantScreen} />
     </Stack.Navigator>
   );
 };
@@ -79,12 +83,7 @@ const TabNav = () => {
           marginBottom: 5,
           fontSize: 15, 
         },
-        tabBarLabelStyle: {
-          fontSize: 12, 
-          letterSpacing: 1, 
-          
-        },
-        tabBarStyle: { backgroundColor: "#fff", height: 60 }, 
+        tabBarStyle: { backgroundColor: "#fff", height: 70,paddingTop:5 }, 
       }}
     >
       <Tab.Screen
@@ -92,8 +91,7 @@ const TabNav = () => {
         component={StackNav}
         options={{
           tabBarLabel: "Home",
-          tabBarLabel: "Home", 
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
               size={28}
@@ -103,11 +101,11 @@ const TabNav = () => {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="Tenant"
+        component={ShowTenantScreen}
         options={{
-          tabBarLabel: "Profile", 
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarLabel: "Tenant", 
+          tabBarIcon: ({ focused, color }) => (
             <FontAwesome
               name={focused ? "user" : "user-o"}
               size={28}
@@ -116,29 +114,26 @@ const TabNav = () => {
           ),
         }}
       />
-
       <Tab.Screen
         name="Property"
         component={PropertyScreen}
         options={{
           tabBarLabel: "Property", 
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color }) => (
             <MaterialCommunityIcons
               name={focused ? "hoop-house" : "greenhouse"}
               size={28}
               color={color} 
             />
           ),
-       
         }}
       />
-
       <Tab.Screen
         name="Setting"
         component={SettingScreen}
         options={{
           tabBarLabel: "Setting", 
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "settings-outline" : "settings-sharp"}
               size={28}
@@ -168,24 +163,18 @@ const DrawerNav = ({ setIsLogedIn }) => {
         headerShown: false, 
       }}
     >
-      {/* The Home screen in the drawer will show the TabNav */}
       <Drawer.Screen name="Home" component={TabNav} />
     </Drawer.Navigator>
   );
 };
 
+// Login Navigation (for login and registration flow)
 const LoginNav = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* Define the Login and Register screens inside a stack */}
-      {/* <Stack.Screen name='EntryPage' component={EntryPage}/>
-      <Stack.Screen name="Login" component={Login} /> */}
-      {/* <Stack.Screen name="Register" component={Register} /> */}
-      {/* <Stack.Screen name="Phone" component={PhonePage} /> */}
-      {/* <Stack.Screen name="AddProperty" component={AddPropertyScreen}/> */}
-
-      {/* After login, navigate to DrawerNav */}
+      <Stack.Screen name="EntryPage" component={EntryPage} />
+      <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Home" component={DrawerNav} />
     </Stack.Navigator>
   );

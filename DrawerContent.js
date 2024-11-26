@@ -14,6 +14,7 @@ const DrawerList = [
   { icon: "greenhouse", label: "Property", navigateTo: "Property" },
   { icon: "settings", label: "Setting", navigateTo: "Setting" },
   { icon: "hoop-house", label: "AddProperty", navigateTo: "AddProperty" }
+
 ];
 
 const DrawerLayout = ({ icon, label, navigateTo }) => {

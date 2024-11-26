@@ -68,16 +68,17 @@ const PropertyScreen = (props) => {
     );
   }
 
+  // {/*<Text style={styles.headerText}>Uploaded Images and Data:</Text>/*}
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => navigation.navigate("AddProperty")}
         style={styles.addPropertyButton}
       >
         <Text style={styles.addPropertyText}>Add Property</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
-      <Text style={styles.headerText}>Uploaded Images and Data:</Text>
+      
 
       <FlatList
         data={propertyData}
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
+    marginTop:20
   },
   propertyImage: {
     width: width - 20, // Full width minus padding

@@ -5664,3 +5664,667 @@ const styles = StyleSheet.create({
     marginBottom:10
   },
 });
+
+******************************* FILE UPLOADING WITH AADHARCARD *****************************************
+// screens/AddTenantScreen.js
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Button } from 'react-native';
+import axios from 'axios';
+import toast from 'react-hot-toast';  // Import the toast library
+import * as ImagePicker from 'expo-image-picker';  // To pick files (images)
+
+const AddTenantScreen = () => {
+  const [tenantName, setTenantName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [aadharCardNumber, setAadharCardNumber] = useState('');
+  const [panCardNumber, setPanCardNumber] = useState('');
+  const [file, setFile] = useState(null);  // State to store the file
+
+  // Function to pick a file
+  const pickFile = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      const base64 = await fileToBase64(result.uri);
+      setFile(base64);
+    }
+  };
+
+  // Convert file to Base64 format
+  const fileToBase64 = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);  // Remove the data URI prefix
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // Handle Save button
+  const handleSave = async () => {
+    try {
+      const tenantData = { tenantName, phoneNumber, aadharCardNumber, panCardNumber, file };
+
+      // Make POST request to save tenant
+      const response = await axios.post('http://localhost:5001/user/tenant', tenantData);
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setTenantName('');
+        setPhoneNumber('');
+        setAadharCardNumber('');
+        setPanCardNumber('');
+        setFile(null); // Clear the file input
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Error occurred while saving tenant data.');
+    }
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container} style={{ backgroundColor: 'white' }}>
+      <View style={styles.form}>
+        <Text style={styles.headerText}>Add Tenant</Text>
+
+        <View>
+          <Text style={styles.label}>Tenant Name</Text>
+          <TextInput
+            placeholder="Enter Tenant Name..."
+            style={styles.input}
+            value={tenantName}
+            onChangeText={setTenantName}
+          />
+
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            placeholder="Enter Phone Number..."
+            style={styles.input}
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+          />
+
+          <Text style={styles.label}>Aadhar Card Number</Text>
+          <TextInput
+            placeholder="Enter Aadhar Number..."
+            style={styles.input}
+            value={aadharCardNumber}
+            onChangeText={setAadharCardNumber}
+            keyboardType="number-pad"
+          />
+
+          <Text style={styles.label}>PAN Card Number</Text>
+          <TextInput
+            placeholder="Enter PAN Card Number..."
+            style={styles.input}
+            value={panCardNumber}
+            onChangeText={setPanCardNumber}
+            keyboardType="default"
+          />
+
+          <TouchableOpacity style={styles.button} onPress={pickFile}>
+            <Text style={styles.buttonText}>Pick a file</Text>
+          </TouchableOpacity>
+
+          {file && (
+            <Text style={styles.fileInfo}>File selected. (Base64 data)</Text>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  form: {
+    marginTop: 20,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  fileInfo: {
+    fontSize: 14,
+    marginBottom: 20,
+    color: 'gray',
+  },
+});
+
+export default AddTenantScreen;
+
+
+*******************************************************************************************************************
+                                  Complete Code To Save tabBarInactiveTintColor
+                                  *********************************************
+                                  ********************************************
+                                  // AddTenantScreen.js
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Text, TextInput, StyleSheet, TouchableWithoutFeedback, Image, ScrollView, ActivityIndicator, Button } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker'; // Import DocumentPicker
+import * as FileSystem from 'expo-file-system'; // Import FileSystem to read files
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios'; // Ensure axios is imported
+
+const AddTenantScreen = () => {
+    const [tenantName, setTenantName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [aadharCardNumber, setAadharCardNumber] = useState('');
+    const [panCardNumber, setPanCardNumber] = useState('');
+    const [image, setImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
+    const [loading, setLoading] = useState(false); // Loading state for saving data and image
+    const [fileName, setFileName] = useState(null); // To store the selected PDF file name
+    const [pdfBase64, setPdfBase64] = useState(null); // To store the PDF base64
+
+    // Function to select and convert PDF file to Base64
+    const selectPDF = async () => {
+        try {
+            // Using Expo Document Picker
+            const res = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+
+            if (res.type === 'success') {
+                setFileName(res.name);
+
+                // Convert PDF to Base64 using FileSystem.readAsStringAsync
+                const base64 = await FileSystem.readAsStringAsync(res.uri, {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+
+                setPdfBase64(base64); // Save PDF as base64
+                console.log('Selected PDF:', res);
+            }
+        } catch (err) {
+            console.error('Error picking document:', err);
+        }
+    };
+
+    // Handle image selection
+    const selectImage = async () => {
+        const result = await launchImageLibrary({ mediaType: "photo" });
+        if (!result.didCancel && result.assets) {
+            const { uri } = result.assets[0];
+            const base64 = await uriToBase64(uri);
+            setImage(base64);
+        }
+    };
+
+    // Convert image URI to base64 string
+    const uriToBase64 = async (uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        return new Promise((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result.split(",")[1]);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleSave = async () => {
+        const tenantData = {
+            tanentName: tenantName,
+            phoneNumber,
+            aadharCardNumber,
+            panCardNumber,
+            imageBase64: image,
+            pdfBase64: pdfBase64 // Ensure PDF Base64 is included in the request payload
+        };
+
+        setLoading(true); // Start loading
+
+        try {
+            const response = await axios.post('http://localhost:5001/user/add_tanent', tenantData);
+            alert('Tenant saved successfully!');
+            console.log(response.data);
+            setTenantName('');
+            setPhoneNumber('');
+            setAadharCardNumber('');
+            setPanCardNumber('');
+            setImage(null);
+            setFileName(null);
+            setPdfBase64(null); // Reset PDF Base64
+        } catch (error) {
+            console.error('Error while saving tenant:', error);
+            alert('Error occurred while saving the tenant');
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
+    return (
+        <ScrollView style={{ backgroundColor: 'white' }} showsHorizontalScrollIndicator={false}>
+            <View style={styles.container}>
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Tenant Name"
+                    value={tenantName}
+                    onChangeText={setTenantName}
+                />
+
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Phone Number"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                />
+
+                <Text style={styles.label}>Aadhar Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Aadhar Number"
+                    value={aadharCardNumber}
+                    onChangeText={setAadharCardNumber}
+                />
+
+                <Text style={styles.label}>Pan Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter PAN Number"
+                    value={panCardNumber}
+                    onChangeText={setPanCardNumber}
+                />
+
+                {image && (
+                    <Image
+                        source={{ uri: `data:image/png;base64,${image}` }}
+                        style={styles.image}
+                    />
+                )}
+
+                <View style={{ marginTop: 10, alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={selectImage}>
+                        <Text style={styles.imageSelectButton}>Select Image</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Button title="Select PDF" onPress={selectPDF} />
+                    {fileName && <Text>Selected: {fileName}</Text>}
+                </View>
+
+                {/* Radio Button */}
+                <View style={styles.radioContainer}>
+                    <TouchableWithoutFeedback onPress={() => setIsChecked(!isChecked)}>
+                        <View style={[styles.radioCircle, isChecked && styles.checked]}>
+                            {isChecked && <View style={styles.innerCircle} />}
+                        </View>
+                    </TouchableWithoutFeedback>
+                    <Text style={styles.radioText}>I agree to the terms</Text>
+                </View>
+
+                {/* Show Save button only if radio is checked */}
+                {isChecked && !loading && (
+                    <TouchableOpacity style={styles.button} onPress={handleSave}>
+                        <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
+                )}
+
+                {/* Show loading spinner while saving */}
+                {loading && (
+                    <ActivityIndicator size="large" color="#4CAF50" style={styles.loader} />
+                )}
+            </View>
+        </ScrollView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+    },
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginBottom: 20,
+        paddingLeft: 10,
+        borderRadius: 5,
+        fontSize: 16,
+        backgroundColor: '#fff',
+    },
+    radioContainer: {
+        marginBottom: 20,
+    },
+    radioCircle: {
+        width: 20,
+        height: 20,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: '#4CAF50',
+        marginRight: 10,
+    },
+    innerCircle: {
+        width: 12,
+        height: 12,
+        borderRadius: 10,
+        backgroundColor: '#4CAF50',
+    },
+    checked: {
+        backgroundColor: '#4CAF50',
+    },
+    radioText: {
+        fontSize: 16,
+    },
+    button: {
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        borderRadius: 5,
+        width: '100%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 18,
+    },
+    label: {
+        fontSize: 18,
+        fontWeight: '400',
+        marginBottom: 8,
+    },
+    image: {
+        width: '98%',
+        height: 300,
+        borderRadius: 8,
+        alignSelf: 'center',
+    },
+    imageSelectButton: {
+        backgroundColor: 'blue',
+        padding: 10,
+        color: '#fff',
+        fontSize: 15,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    loader: {
+        marginTop: 20,
+    },
+});
+
+export default AddTenantScreen;
+
+*********************************************************************************************************
+                          UPDATE CODE TO SAVE TANENT WITHOUT PDF FILE
+                          ******************************************
+                          *******************************************
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Text, TextInput, StyleSheet, TouchableWithoutFeedback, Image, ScrollView, ActivityIndicator, Button } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker'; // Import DocumentPicker
+import * as FileSystem from 'expo-file-system'; // Import FileSystem to read files
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios'; // Ensure axios is imported
+
+const AddTenantScreen = () => {
+    const [tenantName, setTenantName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [aadharCardNumber, setAadharCardNumber] = useState('');
+    const [panCardNumber, setPanCardNumber] = useState('');
+    const [image, setImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
+    const [loading, setLoading] = useState(false); // Loading state for saving data and image
+    // const [message,setMessage]=useState('');
+  
+
+  
+
+    // Handle image selection
+    const selectImage = async () => {
+        const result = await launchImageLibrary({ mediaType: "photo" });
+        if (!result.didCancel && result.assets) {
+            const { uri } = result.assets[0];
+            const base64 = await uriToBase64(uri);
+            setImage(base64);
+        }
+    };
+
+    // Convert image URI to base64 string
+    const uriToBase64 = async (uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        return new Promise((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result.split(",")[1]);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleSave = async () => {
+        const tenantData = {
+            tanentName: tenantName,
+            phoneNumber,
+            aadharCardNumber,
+            panCardNumber,
+            imageBase64: image,
+          
+        };
+
+        setLoading(true); // Start loading
+
+        try {
+            const response = await axios.post('http://localhost:5001/user/add_tanent', tenantData);
+            alert('Tenant saved successfully!');
+            console.log(response.data);
+            setTenantName('');
+            setPhoneNumber('');
+            setAadharCardNumber('');
+            setPanCardNumber('');
+            setImage(null);
+            setFileName(null);
+           
+        } catch (error) {
+            console.error('Error while saving tenant:', error);
+            alert('Error occurred while saving the tenant');
+            // setMessage('PLEASE FILL ALL FEILDS');
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
+    return (
+        <ScrollView style={{ backgroundColor: 'white' }} showsHorizontalScrollIndicator={false}>
+            <View style={styles.container}>
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Tenant Name"
+                    value={tenantName}
+                    onChangeText={setTenantName}
+                />
+
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Phone Number"
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                />
+
+                <Text style={styles.label}>Aadhar Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Aadhar Number"
+                    value={aadharCardNumber}
+                    onChangeText={setAadharCardNumber}
+                />
+
+                <Text style={styles.label}>Pan Number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter PAN Number"
+                    value={panCardNumber}
+                    onChangeText={setPanCardNumber}
+                />
+
+                {image && (
+                    <Image
+                        source={{ uri: `data:image/png;base64,${image}` }}
+                        style={styles.image}
+                    />
+                )}
+
+                <View style={{ marginTop: 10, alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={selectImage}>
+                        <Text style={styles.imageSelectButton}>Select Image</Text>
+                    </TouchableOpacity>
+                </View>
+
+                
+
+                {/* Radio Button */}
+                <View style={styles.radioContainer}>
+                    <TouchableWithoutFeedback onPress={() => setIsChecked(!isChecked)}>
+                        <View style={[styles.radioCircle, isChecked && styles.checked]}>
+                            {isChecked && <View style={styles.innerCircle} />}
+                        </View>
+                    </TouchableWithoutFeedback>
+                    <Text style={styles.radioText}>I agree to the terms</Text>
+                </View>
+
+                <Text>{message}</Text>
+
+                {/* Show Save button only if radio is checked */}
+                {isChecked && !loading && (
+                    <TouchableOpacity style={styles.button} onPress={handleSave}>
+                        <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
+                )}
+
+                {/* Show loading spinner while saving */}
+                {loading && (
+                    <ActivityIndicator size="large" color="#4CAF50" style={styles.loader} />
+                )}
+            </View>
+        </ScrollView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+    },
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginBottom: 20,
+        paddingLeft: 10,
+        borderRadius: 5,
+        fontSize: 16,
+        backgroundColor: '#fff',
+    },
+    radioContainer: {
+        marginBottom: 20,
+    },
+    radioCircle: {
+        width: 20,
+        height: 20,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: '#4CAF50',
+        marginRight: 10,
+    },
+    innerCircle: {
+        width: 12,
+        height: 12,
+        borderRadius: 10,
+        backgroundColor: '#4CAF50',
+    },
+    checked: {
+        backgroundColor: '#4CAF50',
+    },
+    radioText: {
+        fontSize: 16,
+    },
+    button: {
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        borderRadius: 5,
+        width: '100%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 18,
+    },
+    label: {
+        fontSize: 18,
+        fontWeight: '400',
+        marginBottom: 8,
+    },
+    image: {
+        width: '98%',
+        height: 300,
+        borderRadius: 8,
+        alignSelf: 'center',
+    },
+    imageSelectButton: {
+        backgroundColor: 'blue',
+        padding: 10,
+        color: '#fff',
+        fontSize: 15,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    loader: {
+        marginTop: 20,
+    },
+});
+
+export default AddTenantScreen;
