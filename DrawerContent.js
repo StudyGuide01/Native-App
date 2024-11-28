@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const DrawerList = [
   { icon: "home-outline", label: "Home", navigateTo: "Home" },
   { icon: "account-multiple", label: "Profile", navigateTo: "Profile" },
-  { icon: "greenhouse", label: "Property", navigateTo: "Property" },
+  // { icon: "greenhouse", label: "Property", navigateTo: "Property" },
   { icon: "settings", label: "Setting", navigateTo: "Setting" },
   { icon: "hoop-house", label: "AddProperty", navigateTo: "AddProperty" }
 
@@ -29,10 +29,10 @@ const DrawerLayout = ({ icon, label, navigateTo }) => {
       }}
       label={label}
       onPress={() => {
-        console.log(navigation);
-        console.log(navigateTo);
-         navigation.navigate('Profile');
-        //navigation.navigate(navigateTo);
+        // console.log(navigation);
+        // console.log(navigateTo);
+        //  navigation.navigate('Profile');
+        navigation.navigate(navigateTo);
       }}
     />
   );

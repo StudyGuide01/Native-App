@@ -8,11 +8,13 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 const PropertyScreen = (props) => {
   const navigation = useNavigation();
@@ -42,11 +44,11 @@ const PropertyScreen = (props) => {
       />
       <View style={styles.propertyInfoContainer}>
         <Text style={styles.propertyName}>{item.propertyName}</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={styles.propertyDetails}>
           <View>
             <Text style={styles.propertyText}>Rent: ${item.rent}</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 5 }}>
+          <View style={styles.propertyIcons}>
             <Text style={styles.propertyText}>
               <FontAwesome name="bed" size={12} /> {item.bedRoom}
             </Text>
@@ -68,26 +70,40 @@ const PropertyScreen = (props) => {
     );
   }
 
-  // {/*<Text style={styles.headerText}>Uploaded Images and Data:</Text>/*}
+  const handleReverse = () => {
+    navigation.navigate("Home");
+  };
+
   return (
-    <View style={styles.container}>
-      {/* <TouchableOpacity
-        onPress={() => navigation.navigate("AddProperty")}
-        style={styles.addPropertyButton}
-      >
-        <Text style={styles.addPropertyText}>Add Property</Text>
-      </TouchableOpacity> */}
+    <>
+      <View style={styles.header}>
+        <View style={{flexDirection:'row'}}>
+        <TouchableOpacity onPress={handleReverse} style={styles.backButton}>
+          <AntDesign name="arrowleft" color={"#fff"} size={25} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Property</Text>
+        </View>
 
-      
+        <View>
+          <TouchableOpacity onPress={()=>navigation.navigate('AddProperty')}>
+            <Text style={{color:'white'}}>Add Property</Text>
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={propertyData}
-        renderItem={renderPropertyItem}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.imageList}
-        showsHorizontalScrollIndicator={false} // Hide horizontal scroll indicator
-      />
-    </View>
+      </View>
+
+      <View style={styles.container}>
+        <ScrollView showsHorizontalScrollIndicator={false}>
+          <FlatList
+            data={propertyData}
+            renderItem={renderPropertyItem}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.imageList}
+            showsHorizontalScrollIndicator={false} // Hide horizontal scroll indicator
+          />
+        </ScrollView>
+      </View>
+    </>
   );
 };
 
@@ -99,21 +115,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 10,
   },
-  addPropertyButton: {
-    padding: 10,
-    backgroundColor: "#4CAF50",
-    borderRadius: 5,
-    marginVertical: 10,
+  header: {
+    backgroundColor: 'blue',
+    color: '#fff',
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    paddingVertical: 10,
+    alignItems: 'center',
+    paddingHorizontal: 15,
   },
-  addPropertyText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
+  backButton: {
+    marginRight: 10,
   },
   headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   imageList: {
     paddingBottom: 20,
@@ -127,7 +144,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
-    marginTop:20
+    marginTop: 10,
+    elevation: 5,
   },
   propertyImage: {
     width: width - 20, // Full width minus padding
@@ -150,6 +168,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "gray",
     marginBottom: 5,
+  },
+  propertyDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  propertyIcons: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
   },
   loadingContainer: {
     flex: 1,

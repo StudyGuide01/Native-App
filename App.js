@@ -173,7 +173,8 @@ const LoginNav = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="EntryPage" component={EntryPage} />
+      {/* <Stack.Screen name='AddTenant' component={AddTenantScreen} /> */}
+      {/* <Stack.Screen name="EntryPage" component={EntryPage} /> */}
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Home" component={DrawerNav} />
     </Stack.Navigator>

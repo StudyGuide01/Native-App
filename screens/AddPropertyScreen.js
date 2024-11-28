@@ -92,9 +92,9 @@ const FormComponent = () => {
       showsHorizontalScrollIndicator={false}
     >
 
-      <View style={{alignSelf:'center',marginTop:10,width:'97%'}}>
+      {/* <View style={{alignSelf:'center',marginTop:10,width:'97%'}}>
         <Text style={styles.heading}>Add Your Property</Text>
-      </View>
+      </View> */}
       <View style={styles.form}>
         <Text style={styles.label}>Property Name</Text>
         <TextInput

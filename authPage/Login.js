@@ -76,7 +76,7 @@ const Login = () => {
         Toast.show({
           type: 'success',
           text1: 'Success',
-          text2: 'OTP Verified successfully!',
+          // text2: 'OTP Verified successfully!',
         });
 
         if (Platform.OS !== 'web') {
